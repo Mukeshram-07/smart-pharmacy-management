@@ -106,6 +106,8 @@ public class MainFrame extends JFrame {
         addSidebarButton(sidebar, "📦 Stock", this::showStock);
         addSidebarButton(sidebar, "💰 Billing", this::showBilling);
         addSidebarButton(sidebar, "📜 Bill History", this::showBillHistory);
+        addSidebarButton(sidebar, "🏭 Suppliers", this::showSuppliers);
+        addSidebarButton(sidebar, "📋 Purchases", this::showPurchaseHistory);
         addSidebarButton(sidebar, "📄 Scanner", this::showScanner);
         
         // Push logout button to bottom
@@ -201,6 +203,22 @@ public class MainFrame extends JFrame {
     private void showBillHistory() {
         BillHistoryPanel historyPanel = new BillHistoryPanel();
         switchPanel(historyPanel, "BillHistory");
+    }
+
+    /**
+     * Show the supplier management view.
+     */
+    private void showSuppliers() {
+        SupplierPanel panel = new SupplierPanel();
+        switchPanel(panel, "Suppliers");
+    }
+
+    /**
+     * Show the purchase history view.
+     */
+    private void showPurchaseHistory() {
+        PurchaseHistoryPanel panel = new PurchaseHistoryPanel();
+        switchPanel(panel, "PurchaseHistory");
     }
 
     /**

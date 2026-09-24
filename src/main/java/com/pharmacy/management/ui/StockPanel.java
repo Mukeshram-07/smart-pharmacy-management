@@ -4,9 +4,11 @@ import com.pharmacy.management.model.Medicine;
 import com.pharmacy.management.model.Session;
 import com.pharmacy.management.model.Stock;
 import com.pharmacy.management.model.StockTransaction;
+import com.pharmacy.management.model.Supplier;
 import com.pharmacy.management.service.MedicineService;
 import com.pharmacy.management.service.ServiceException;
 import com.pharmacy.management.service.StockService;
+import com.pharmacy.management.service.SupplierService;
 import com.pharmacy.management.service.ValidationException;
 import com.pharmacy.management.ui.components.CustomButton;
 import com.pharmacy.management.ui.components.CustomTextField;
@@ -406,14 +408,32 @@ public class StockPanel extends JPanel {
         medicineCombo.putClientProperty("medicineMap", medicineMap);
         form.add(medicineCombo, gbc);
 
+        // --- Supplier combo ---
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
+        form.add(bold("Supplier"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1;
+        JComboBox<String> supplierCombo = new JComboBox<>();
+        supplierCombo.addItem("-- None --");
+        java.util.Map<String, Integer> supplierMap = new java.util.LinkedHashMap<>();
+        try {
+            SupplierService ss = new SupplierService();
+            for (Supplier sup : ss.getActiveSuppliers()) {
+                String label = sup.getSupplierName() + " (" + sup.getCompanyName() + ")";
+                supplierCombo.addItem(label);
+                supplierMap.put(label, sup.getSupplierId());
+            }
+        } catch (Exception ignored) {}
+        supplierCombo.setPreferredSize(new Dimension(250, 34));
+        form.add(supplierCombo, gbc);
+
         // --- Text fields ---
         String[] labels  = {"Batch Number *", "Quantity *", "Min Stock Level *",
-                             "Expiry Date * (YYYY-MM-DD)", "Supplier", "Purchase Price"};
-        String[] defaults = {"", "0", "10", "", "", ""};
+                             "Expiry Date * (YYYY-MM-DD)", "Purchase Price"};
+        String[] defaults = {"", "0", "10", "", ""};
         JTextField[] fields = new JTextField[labels.length];
 
         for (int i = 0; i < labels.length; i++) {
-            gbc.gridx = 0; gbc.gridy = i + 1; gbc.weightx = 0;
+            gbc.gridx = 0; gbc.gridy = i + 2; gbc.weightx = 0;
             form.add(bold(labels[i]), gbc);
             gbc.gridx = 1; gbc.weightx = 1;
             fields[i] = new JTextField(defaults[i]);
@@ -446,12 +466,17 @@ public class StockPanel extends JPanel {
                 int qty        = Integer.parseInt(fields[1].getText().trim());
                 int minLevel   = Integer.parseInt(fields[2].getText().trim());
                 LocalDate expiry = LocalDate.parse(fields[3].getText().trim());
-                String supplier  = fields[4].getText().trim();
-                String priceStr  = fields[5].getText().trim();
+                String priceStr  = fields[4].getText().trim();
                 BigDecimal price = priceStr.isEmpty() ? null : new BigDecimal(priceStr);
 
+                // Resolve supplier from combo
+                String selectedSupplier = (String) supplierCombo.getSelectedItem();
+                String supplierName = (selectedSupplier == null || selectedSupplier.startsWith("--"))
+                    ? null : selectedSupplier.split(" \\(")[0];
+                Integer suppId = supplierMap.getOrDefault(selectedSupplier, null);
+
                 Stock stock = new Stock(medicineId, batch, qty, minLevel, expiry,
-                                        supplier.isEmpty() ? null : supplier, price);
+                                        supplierName, price);
                 stockService.addStock(stock);
 
                 JOptionPane.showMessageDialog(dialog,
