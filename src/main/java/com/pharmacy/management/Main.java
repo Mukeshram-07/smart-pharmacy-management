@@ -36,6 +36,9 @@ public class Main {
             // Initialise Module 4 billing schema (safe to run every startup)
             SchemaInitializer.initializeBillingSchema();
 
+            // Initialise Module 5 supplier schema (safe to run every startup)
+            SchemaInitializer.initializeSupplierSchema();
+
             // Start the application on EDT
             SwingUtilities.invokeLater(() -> {
                 LoginFrame loginFrame = new LoginFrame();

@@ -82,27 +82,42 @@ public class SupplierService {
 
     public List<Supplier> getAllSuppliers() throws ServiceException {
         try { return supplierDAO.findAllSuppliers(); }
-        catch (SQLException e) { throw new ServiceException("Failed to retrieve suppliers"); }
+        catch (Exception e) {
+            logger.error("getAllSuppliers failed", e);
+            throw new ServiceException("Failed to retrieve suppliers: " + e.getMessage());
+        }
     }
 
     public List<Supplier> getActiveSuppliers() throws ServiceException {
         try { return supplierDAO.findActiveSuppliers(); }
-        catch (SQLException e) { throw new ServiceException("Failed to retrieve active suppliers"); }
+        catch (Exception e) {
+            logger.error("getActiveSuppliers failed", e);
+            throw new ServiceException("Failed to retrieve active suppliers: " + e.getMessage());
+        }
     }
 
     public Supplier getSupplierById(int id) throws ServiceException {
         try { return supplierDAO.findSupplierById(id); }
-        catch (SQLException e) { throw new ServiceException("Failed to retrieve supplier"); }
+        catch (Exception e) {
+            logger.error("getSupplierById failed id={}", id, e);
+            throw new ServiceException("Failed to retrieve supplier: " + e.getMessage());
+        }
     }
 
     public List<Supplier> searchSuppliers(String term) throws ServiceException {
         try { return supplierDAO.searchSuppliers(term); }
-        catch (SQLException e) { throw new ServiceException("Failed to search suppliers"); }
+        catch (Exception e) {
+            logger.error("searchSuppliers failed term={}", term, e);
+            throw new ServiceException("Failed to search suppliers: " + e.getMessage());
+        }
     }
 
     public int getSupplierCount() throws ServiceException {
         try { return supplierDAO.countSuppliers(); }
-        catch (SQLException e) { throw new ServiceException("Failed to count suppliers"); }
+        catch (Exception e) {
+            logger.error("getSupplierCount failed", e);
+            throw new ServiceException("Failed to count suppliers: " + e.getMessage());
+        }
     }
 
     // =========================================================================
@@ -172,17 +187,26 @@ public class SupplierService {
 
     public List<MedicinePurchase> getAllPurchases() throws ServiceException {
         try { return supplierDAO.findAllPurchases(); }
-        catch (SQLException e) { throw new ServiceException("Failed to retrieve purchases"); }
+        catch (Exception e) {
+            logger.error("getAllPurchases failed", e);
+            throw new ServiceException("Failed to retrieve purchases: " + e.getMessage());
+        }
     }
 
     public List<MedicinePurchase> searchPurchases(String term) throws ServiceException {
         try { return supplierDAO.searchPurchases(term); }
-        catch (SQLException e) { throw new ServiceException("Failed to search purchases"); }
+        catch (Exception e) {
+            logger.error("searchPurchases failed", e);
+            throw new ServiceException("Failed to search purchases: " + e.getMessage());
+        }
     }
 
     public List<MedicinePurchase> getPurchasesBySupplier(int supplierId) throws ServiceException {
         try { return supplierDAO.findPurchasesBySupplier(supplierId); }
-        catch (SQLException e) { throw new ServiceException("Failed to retrieve purchases for supplier"); }
+        catch (Exception e) {
+            logger.error("getPurchasesBySupplier failed id={}", supplierId, e);
+            throw new ServiceException("Failed to retrieve purchases for supplier: " + e.getMessage());
+        }
     }
 
     // =========================================================================
@@ -191,42 +215,42 @@ public class SupplierService {
 
     public double getTodayPurchaseAmount() throws ServiceException {
         try { return supplierDAO.getTodayPurchaseAmount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get today's purchase amount"); }
+        catch (Exception e) { throw new ServiceException("Failed to get today's purchase amount: " + e.getMessage()); }
     }
 
     public int getTodayBillCount() throws ServiceException {
         try { return supplierDAO.getTodayBillCount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get today's bill count"); }
+        catch (Exception e) { throw new ServiceException("Failed to get today's bill count: " + e.getMessage()); }
     }
 
     public double getTodaySalesAmount() throws ServiceException {
         try { return supplierDAO.getTodaySalesAmount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get today's sales amount"); }
+        catch (Exception e) { throw new ServiceException("Failed to get today's sales amount: " + e.getMessage()); }
     }
 
     public double getWeekSalesAmount() throws ServiceException {
         try { return supplierDAO.getWeekSalesAmount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get week sales amount"); }
+        catch (Exception e) { throw new ServiceException("Failed to get week sales amount: " + e.getMessage()); }
     }
 
     public double getMonthSalesAmount() throws ServiceException {
         try { return supplierDAO.getMonthSalesAmount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get month sales amount"); }
+        catch (Exception e) { throw new ServiceException("Failed to get month sales amount: " + e.getMessage()); }
     }
 
     public int getExpiringSoonCount(int days) throws ServiceException {
         try { return supplierDAO.getExpiringSoonCount(days); }
-        catch (SQLException e) { throw new ServiceException("Failed to get expiring-soon count"); }
+        catch (Exception e) { throw new ServiceException("Failed to get expiring-soon count: " + e.getMessage()); }
     }
 
     public int getExpiredCount() throws ServiceException {
         try { return supplierDAO.getExpiredCount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get expired count"); }
+        catch (Exception e) { throw new ServiceException("Failed to get expired count: " + e.getMessage()); }
     }
 
     public int getTotalMedicinesCount() throws ServiceException {
         try { return supplierDAO.getTotalMedicinesCount(); }
-        catch (SQLException e) { throw new ServiceException("Failed to get medicines count"); }
+        catch (Exception e) { throw new ServiceException("Failed to get medicines count: " + e.getMessage()); }
     }
 
     // =========================================================================

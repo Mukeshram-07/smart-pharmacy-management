@@ -148,6 +148,81 @@ public class SchemaInitializer {
         }
     }
 
+    /**
+     * Initialises the Module 5 (Supplier Management) database schema on application startup.
+     * Safe to run every startup — uses CREATE TABLE IF NOT EXISTS and column existence checks.
+     */
+    public static void initializeSupplierSchema() {
+        try (Connection conn = DatabaseConfig.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // --- suppliers table ---
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS suppliers (" +
+                "  supplier_id   INT AUTO_INCREMENT PRIMARY KEY," +
+                "  supplier_name VARCHAR(200) NOT NULL," +
+                "  company_name  VARCHAR(200) NOT NULL," +
+                "  phone         VARCHAR(20)  NOT NULL," +
+                "  email         VARCHAR(200)," +
+                "  address       TEXT," +
+                "  gst_number    VARCHAR(50)," +
+                "  status        ENUM('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE'," +
+                "  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "  updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                "  INDEX idx_supplier_name (supplier_name)," +
+                "  INDEX idx_supplier_status (status)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+
+            // --- medicine_purchases table ---
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS medicine_purchases (" +
+                "  purchase_id         INT AUTO_INCREMENT PRIMARY KEY," +
+                "  supplier_id         INT NOT NULL," +
+                "  medicine_id         INT NOT NULL," +
+                "  batch_number        VARCHAR(100) NOT NULL," +
+                "  quantity            INT NOT NULL," +
+                "  purchase_price      DECIMAL(10,2) NOT NULL," +
+                "  selling_price       DECIMAL(10,2)," +
+                "  manufacturing_date  DATE," +
+                "  expiry_date         DATE NOT NULL," +
+                "  minimum_stock_level INT NOT NULL DEFAULT 10," +
+                "  purchase_date       TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "  performed_by        VARCHAR(100)," +
+                "  notes               VARCHAR(500)," +
+                "  CONSTRAINT fk_purchase_supplier FOREIGN KEY (supplier_id)" +
+                "    REFERENCES suppliers(supplier_id) ON DELETE RESTRICT," +
+                "  CONSTRAINT fk_purchase_medicine FOREIGN KEY (medicine_id)" +
+                "    REFERENCES medicines(medicine_id) ON DELETE RESTRICT," +
+                "  INDEX idx_purchase_supplier (supplier_id)," +
+                "  INDEX idx_purchase_medicine (medicine_id)," +
+                "  INDEX idx_purchase_date (purchase_date)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+
+            // --- Add supplier_id FK to stock table if missing ---
+            try (ResultSet colCheck = stmt.executeQuery(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'stock' " +
+                    "AND COLUMN_NAME = 'supplier_id'")) {
+                if (colCheck.next() && colCheck.getInt(1) == 0) {
+                    stmt.execute("ALTER TABLE stock ADD COLUMN supplier_id INT NULL");
+                    stmt.execute(
+                        "ALTER TABLE stock ADD CONSTRAINT fk_stock_supplier " +
+                        "FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE SET NULL"
+                    );
+                    logger.info("Added supplier_id column to stock table");
+                }
+            }
+
+            logger.info("Supplier schema initialised successfully");
+
+        } catch (Exception e) {
+            logger.warn("Supplier schema initialisation warning: {}", e.getMessage());
+        }
+    }
+}
+
     private SchemaInitializer() {
         throw new UnsupportedOperationException("Utility class");
     }
